@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日一句 · 好词好句</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+    <h1 id="titleClick">每日一句 · 好词好句</h1>
+    <p>摘录昨日短句 | 文字自留地</p>
+</header>
+
+<!-- 密码入口 完全隐藏 -->
+<div class="admin-entry" id="adminEntry">
+    <input type="password" id="pwd" placeholder="管理员密码">
+    <button onclick="unlock()">进入编辑</button>
+</div>
+
+<!-- 编辑面板 解锁才显示 -->
+<div class="edit-box" id="editBox">
+    <h3>新增昨日短句</h3>
+    <div class="form-item">
+        <span>自动昨日日期：</span>
+        <input id="dayDate" readonly>
+    </div>
+    <div class="form-item">
+        <textarea id="sentence" placeholder="输入一句好词好句..."></textarea>
+    </div>
+    <div class="form-item">
+        <input id="imgLink" placeholder="图片链接(无图留空)">
+    </div>
+    <button class="save-btn" onclick="saveToGithub()">永久保存发布</button>
+    <button class="lock-btn" onclick="lockEdit()">关闭编辑</button>
+</div>
+
+<main class="container">
+    <div id="listWrap">
+        <!-- 所有内容自动渲染 -->
+    </div>
+    <div class="pagination" id="pageBox"></div>
+</main>
+
+<footer class="footer">© 2026 文字收藏</footer>
+
+<script>
+// ==================== 你只改这里3项 + 密码 ====================
+const CONFIG = {
+  username: "你的GitHub用户名",
+  repo: "你的仓库名",
+  token: "你的GitHub个人Token",
+  pwd: "888888",      // 自己改密码
+  pageSize: 11        // 每页11条 固定
+};
+// =============================================================
+
+// 点击标题5次弹出密码框
+let clickNum = 0;
+document.getElementById("titleClick").onclick = ()=>{
+    clickNum++;
+    if(clickNum >= 5){
+        document.getElementById("adminEntry").style.display = "block";
+        clickNum = 0;
+    }
+};
+
+// 解锁编辑
+function unlock(){
+    let val = document.getElementById("pwd").value;
+    if(val === CONFIG.pwd){
+        document.getElementById("editBox").style.display = "block";
+        document.getElementById("adminEntry").style.display = "none";
+        getYesDate();
+    }else{
+        alert("密码错误");
+    }
+}
+// 关闭编辑
+function lockEdit(){
+    document.getElementById("editBox").style.display = "none";
+}
+
+// 获取昨日日期 格式 DD.MM.YY
+function getYesDate(){
+    let d = new Date();
+    d.setDate(d.getDate()-1);
+    let day = String(d.getDate()).padStart(2,"0");
+    let m = String(d.getMonth()+1).padStart(2,"0");
+    let y = String(d.getFullYear()).slice(-2);
+    document.getElementById("dayDate").value = `${day}.${m}.${y}`;
+}
+
+// 读取线上index.html内容
+async function getNowHtml(){
+    let res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/index.html`,{
+        headers: {Authorization: "token "+CONFIG.token}
+    });
+    let json = await res.json();
+    return {
+        content: decodeURIComponent(escape(atob(json.content))),
+        sha: json.sha
+    };
+}
+
+// 新增一条卡片 插到最顶部
+async function saveToGithub(){
+    let date = document.getElementById("dayDate").value;
+    let text = document.getElementById("sentence").value.trim();
+    let img = document.getElementById("imgLink").value.trim();
+    if(!text) return alert("请输入句子");
+
+    // 拼接新卡片
+    let card = `<div class="card">
+    <div class="date">${date}</div>
+    <div class="quote">${text}</div>
+    ${img ? `<img src="${img}" class="quote-img">` : ""}
+</div>\n`;
+
+    let {content,sha} = await getNowHtml();
+    // 插入到列表最前面
+    let newHtml = content.replace('<div id="listWrap">',`<div id="listWrap">\n${card}`);
+
+    // 提交覆盖到github 永久保存
+    await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/index.html`,{
+        method:"PUT",
+        headers: {
+            "Authorization":"token "+CONFIG.token,
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            message:"新增每日短句",
+            content: btoa(unescape(encodeURIComponent(newHtml))),
+            sha: sha
+        })
+    });
+    alert("保存成功！已永久同步到云端");
+    location.reload();
+}
+
+// 分页渲染
+let pageNow = 1;
+let cardList = [];
+function initPage(){
+    let wrap = document.getElementById("listWrap");
+    cardList = Array.from(wrap.querySelectorAll(".card"));
+    let total = cardList.length;
+    let totalPage = Math.ceil(total / CONFIG.pageSize);
+    renderPage();
+    createPageBtn(totalPage);
+}
+function renderPage(){
+    cardList.forEach((item,idx)=>{
+        let s = (pageNow-1)*CONFIG.pageSize;
+        let e = pageNow*CONFIG.pageSize;
+        item.style.display = (idx>=s && idx<e) ? "block":"none";
+    })
+}
+function createPageBtn(total){
+    let box = document.getElementById("pageBox");
+    box.innerHTML = "";
+    if(total<=1) return;
+    for(let i=1;i<=total;i++){
+        let btn = document.createElement("button");
+        btn.innerText = i;
+        btn.className = "page-btn"+(i===pageNow?" active":"");
+        btn.onclick=()=>{
+            pageNow = i;
+            renderPage();
+            document.querySelectorAll(".page-btn").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+        }
+        box.appendChild(btn);
+    }
+}
+window.onload = ()=>{
+    setTimeout(initPage,300);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:Georgia,"Times New Roman",serif;
+    background:#f7f7f7;
+    color:#222;
+    line-height:1.9;
+}
+.header{
+    text-align:center;
+    padding:55px 20px;
+    max-width:720px;
+    margin:0 auto;
+}
+.header h1{
+    font-size:30px;
+    font-weight:500;
+    letter-spacing:1px;
+    margin-bottom:8px;
+    cursor:pointer;
+}
+.header p{color:#777;font-size:15px;}
+
+/* 管理入口隐藏 */
+.admin-entry{
+    display:none;
+    text-align:center;
+    margin-bottom:20px;
+}
+.admin-entry input{
+    padding:8px 10px;
+    width:200px;
+    border:1px solid #ddd;
+    border-radius:4px;
+}
+.admin-entry button{
+    padding:8px 15px;
+    background:#222;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    margin-left:8px;
+}
+
+/* 编辑面板 */
+.edit-box{
+    display:none;
+    max-width:700px;
+    margin:0 auto 30px;
+    padding:25px;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 1px 5px #eee;
+}
+.edit-box h3{text-align:center;margin-bottom:20px;}
+.form-item{margin-bottom:15px;}
+.form-item input,.form-item textarea{
+    width:100%;
+    border:1px solid #ddd;
+    padding:10px;
+    border-radius:4px;
+    font-size:15px;
+}
+.form-item textarea{min-height:80px;resize:vertical;}
+.save-btn{
+    background:#222;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:4px;
+    cursor:pointer;
+    margin-right:10px;
+}
+.lock-btn{
+    background:#666;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.container{
+    max-width:700px;
+    margin:0 auto 80px;
+    padding:0 20px;
+}
+/* 杂志风独立卡片 */
+.card{
+    background:#fff;
+    border-radius:6px;
+    padding:35px;
+    margin-bottom:30px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.date{
+    font-size:14px;
+    color:#999;
+    letter-spacing:1px;
+    margin-bottom:18px;
+}
+.quote{
+    font-size:22px;
+    line-height:1.75;
+    color:#2d2d2d;
+}
+.quote-img{
+    width:100%;
+    border-radius:4px;
+    margin-top:22px;
+}
+
+/* 分页 */
+.pagination{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-top:40px;
+}
+.page-btn{
+    padding:8px 14px;
+    border:1px solid #ddd;
+    background:#fff;
+    border-radius:4px;
+    cursor:pointer;
+}
+.page-btn.active{
+    background:#222;
+    color:#fff;
+    border-color:#222;
+}
+
+.footer{
+    text-align:center;
+    padding:30px;
+    color:#aaa;
+    font-size:13px;
+}
+@media (max-width:600px){
+    .card{padding:25px 20px;}
+    .quote{font-size:19px;}
+}
